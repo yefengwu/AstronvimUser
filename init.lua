@@ -4,6 +4,17 @@
 -- You can think of a Lua "table" as a dictionary like data structure the
 -- normal format is "key = value". These also handle array like data structures
 -- where a value with no key simply has an implicit numeric key
+local function copy(lines, _)
+  vim.fn.OSCYankString(table.concat(lines, "\n"))
+end
+
+local function paste()
+  return {
+    vim.fn.split(vim.fn.getreg(''), '\n'),
+    vim.fn.getregtype('')
+  }
+end
+
 local config = {
 
   -- Configure AstroNvim updates
@@ -16,7 +27,7 @@ local config = {
     pin_plugins = nil, -- nil, true, false (nil will pin plugins on stable only)
     skip_prompts = false, -- skip prompts about breaking changes
     show_changelog = true, -- show the changelog after performing an update
-    auto_reload = false, -- automatically reload and sync packer after a successful update
+    auto_reload = true, -- automatically reload and sync packer after a successful update
     auto_quit = false, -- automatically quit the current session after a successful update
     -- remotes = { -- easily add new remotes to track
     --   ["remote_name"] = "https://remote_url.come/repo.git", -- full remote url
@@ -47,6 +58,9 @@ local config = {
       spell = false, -- sets vim.opt.spell
       signcolumn = "auto", -- sets vim.opt.signcolumn to auto
       wrap = false, -- sets vim.opt.wrap
+      softtabstop = 4, -- modify behavior about tab.
+      tabstop = 4, -- set tab show width
+      expandtab = true, -- replace tab character to specified number space.
     },
     g = {
       mapleader = " ", -- sets vim.g.mapleader
@@ -56,6 +70,17 @@ local config = {
       diagnostics_enabled = true, -- enable diagnostics at start
       status_diagnostics_enabled = true, -- enable diagnostics in statusline
       icons_enabled = true, -- disable icons in the UI (disable if no nerd font is available, requires :PackerSync after changing)
+      clipboard = {
+          name = "osc52",
+          copy = {
+            ["+"] = copy,
+            ["*"] = copy
+          },
+          paste = {
+            ["+"] = paste,
+            ["*"] = paste
+          },
+      }
     },
   },
   -- If you need more control, you can use the function()...end notation
@@ -107,7 +132,7 @@ local config = {
       highlighturl = true,
       hop = false,
       indent_blankline = true,
-      lightspeed = false,
+      lightspeed = true,
       ["neo-tree"] = true,
       notify = true,
       ["nvim-tree"] = false,
@@ -136,7 +161,7 @@ local config = {
     formatting = {
       -- control auto formatting on save
       format_on_save = {
-        enabled = true, -- enable or disable format on save globally
+        enabled = false, -- enable or disable format on save globally
         disable_filetypes = { -- disable format on save for specified filetypes
           -- "python",
         },
@@ -195,8 +220,7 @@ local config = {
       ["<leader>bc"] = { "<cmd>BufferLinePickClose<cr>", desc = "Pick to close" },
       ["<leader>bj"] = { "<cmd>BufferLinePick<cr>", desc = "Pick to jump" },
       ["<leader>bt"] = { "<cmd>BufferLineSortByTabs<cr>", desc = "Sort by tabs" },
-      [",q"] = { ":q!<cr>", desc = "Force quit" },
-      [",w"] = { ":w!<cr>", desc = "Force write" },
+      ["<leader>r"] = { ":!g++ -Wall % && ./a.out<cr>", desc = "Compile and run C++ code" },
       ["<C-f>"] = { "<cmd>Telescope file_browser<cr>", desc = "Telescope file_browser" },
       ["<A-e>"] = { "<cmd>Telescope projects<cr>", desc = "Telescope projects" },
       ["<A-p>"] = { "<cmd>Telescope commands<cr>", desc = "Telescope commands" },
@@ -220,6 +244,11 @@ local config = {
         after = "telescope.nvim",
         cwd_to_path = true,
         config = function() require("telescope").load_extension "file_browser" end,
+      },
+      {
+        "ojroques/vim-oscyank",
+        branch = "main",
+        oscyank_silent = true,
       },
       {
         "ahmedkhalf/project.nvim",
